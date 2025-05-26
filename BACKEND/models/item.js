@@ -1,24 +1,22 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const itemSchema = new Schema({
+  // Removed petId field to prevent duplicate key errors
   name: {
     type: String,
     required: true,
-    trim: true,
-    maxlength: 100
+    trim: true
   },
   category: {
     type: String,
     required: true,
-    enum: ['Groceries', 'Electronics', 'Cleaning', 'Other'],
-    default: 'Other'
+    trim: true
   },
   quantity: {
     type: Number,
     required: true,
-    min: 1,
-    max: 1000
+    min: 1
   },
   purchaseDate: {
     type: Date,
@@ -28,25 +26,12 @@ const itemSchema = new Schema({
     type: Date,
     validate: {
       validator: function(value) {
+        // Only validate if expiryDate is provided. It must be later than purchaseDate.
         return !value || value > this.purchaseDate;
       },
-      message: 'Expiry date must be later than purchase date'
+      message: "Expiry date must be later than purchase date"
     }
-  },
-  image: {
-    type: String,
-    trim: true
   }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
 });
 
-// Virtual for image URL
-itemSchema.virtual('imageUrl').get(function() {
-  if (!this.image) return null;
-  return `${process.env.BASE_URL || 'http://localhost:8090'}/${this.image}`;
-});
-
-module.exports = mongoose.model('Item', itemSchema);
+module.exports = mongoose.model("Item", itemSchema);
